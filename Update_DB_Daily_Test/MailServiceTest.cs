@@ -21,10 +21,10 @@ namespace Update_DB_Daily_Test
         private Mock<IConfiguration> _mockConfiguration;
         private Mock<ILogger<MailService>> _mockLogger;
         private MailModel _mockmailModel;
-        private readonly string MailFrom = "swapnilsavat@gmail.com";
-        private readonly string MailTO = "swapnilssawat@gmail.com";
-        private readonly string hostName = "smtp.gmail.com";
-        private readonly string password = "cxcuzibjriotvcox";
+        private readonly string _mailFrom = "swapnilsavat@gmail.com";
+        private readonly string _mailTO = "swapnilssawat@gmail.com";
+        private readonly string _hostName = "smtp.gmail.com";
+        private readonly string _password = "password";
 
         [SetUp]
         public void init()
@@ -38,7 +38,7 @@ namespace Update_DB_Daily_Test
         [Test]
         public void GivenSubjectAndBodyOfMailHavingNullFromAddress_ThenfunctionshouldReturnValueCannotBeNullException()
         {
-            _mockmailModel = new MailModel() {FROM = null, TO = MailTO, HostName = hostName, Password = password };
+            _mockmailModel = new MailModel() {FROM = null, TO = _mailTO, HostName = _hostName, Password = _password };
             _mailService = new MailService(_mockLogger.Object, (Microsoft.Extensions.Configuration.IConfiguration)_mockConfiguration.Object, _mockmailModel);
             var subject = "Data inserted successfully";
             var body = "Data inserted to database successfully at: " + DateTime.Now.ToString("hh:mm:ss tt");
@@ -48,7 +48,7 @@ namespace Update_DB_Daily_Test
         [Test]
         public void GivenSubjectAndBodyOfMailHavingNullToAddress_ThenfunctionshouldReturnValueCannotBeNullException()
         {
-            _mockmailModel = new MailModel() { FROM = MailFrom, HostName = hostName, Password = password };
+            _mockmailModel = new MailModel() { FROM = _mailFrom, HostName = _hostName, Password = _password };
             _mailService = new MailService(_mockLogger.Object, (Microsoft.Extensions.Configuration.IConfiguration)_mockConfiguration.Object, _mockmailModel);
             var subject = "Data inserted successfully";
             var body = "Data inserted to database successfully at: " + DateTime.Now.ToString("hh:mm:ss tt");
