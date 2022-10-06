@@ -34,6 +34,7 @@ namespace Update_DB_Daily_Test
             /*_mockmailModel = new MailModel() {  TO = MailTO, HostName = hostName, Password = password};
             _mailService = new MailService(_mockLogger.Object, (Microsoft.Extensions.Configuration.IConfiguration)_mockConfiguration.Object,_mockmailModel);*/   
         }
+        // we write test cases for all possinle scenarios not only for exceptions
 
         [Test]
         public void GivenSubjectAndBodyOfMailHavingNullFromAddress_ThenfunctionshouldReturnValueCannotBeNullException()

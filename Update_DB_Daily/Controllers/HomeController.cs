@@ -29,6 +29,7 @@ namespace Update_DB_Daily.Controllers
             try
             {
                 _logger.LogInformation("Recurring job started");
+                //you should also define timing for job's execution, read it from appSettings.json
                 RecurringJob.AddOrUpdate(() => _readFileData.ReadFile(_filePath), Cron.Daily);
                 _logger.LogInformation("File data insertion task done and Mail sent");
             }

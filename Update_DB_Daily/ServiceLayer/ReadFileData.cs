@@ -27,6 +27,7 @@ namespace Update_DB_Daily.ServiceLayer
                 _logger.LogInformation("Data reading started");
                 var projectList = new List<Project>();
                 var csvFileData = File.ReadAllText(filePath);
+                //use try catch in foreach also if exception occur in one row whole data should not be rejected but only that row, and it should be logged also sent in me stating error at this line of file
                 foreach (var row in csvFileData.Split('\n'))
                 {
                     if (!string.IsNullOrEmpty(row))
