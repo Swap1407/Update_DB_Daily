@@ -44,6 +44,8 @@ namespace Update_DB_Daily.ServiceLayer
                 _insertFileDataToDB.InsertDataToDB(projectList);
 
                 _logger.LogInformation("Success mail sending started");
+
+                // use enum for mailSubjects and import status. Manage import using it's status. whether error, failed or successful
                 var mailsubject = "Data insertion Successful";
                 var mailbody = "Data inserted to database successfully at: "+ DateTime.Now.ToString("hh:mm:ss tt");
                 _mailService.SendMail(mailsubject,mailbody);
