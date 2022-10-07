@@ -10,7 +10,7 @@ namespace Update_DB_Daily.ServiceLayer
     public interface IProjectRepository
     {
         //use proper naming, it should be only InsertProjects
-        public void InsertProject(List<Project> projectList);
+        public void AddProject(List<Project> projectList);
 
     }
 }

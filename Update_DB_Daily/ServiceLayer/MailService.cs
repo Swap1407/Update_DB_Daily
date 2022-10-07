@@ -23,18 +23,26 @@ namespace Update_DB_Daily.ServiceLayer
             _configuration = configuration;
             _mailModel = mailModel;
         }
-        public enum Status{Successful,Failed};
 
-        public void SendMail(int status)
+        //you should declare this enum in separate file as it will be referenced from different files
+        //It is a good practice to assign numbers to enum values
+       // public enum Status{Successful,Failed};
+
+        public void SendMail(int status, List<Project> errors)
         {
             try
             {
                 _logger.LogInformation("Mail sending started From: "+ _mailModel.From+" To: "+ _mailModel.To);
                 using (var mailmessage = new MailMessage(_mailModel.From, _mailModel.To))
                 {
-                    string[] taskstatus = Status.GetNames(typeof(Status));
-                    mailmessage.Subject = "Data Insertion: "+taskstatus[status];
-                    mailmessage.Body = "Data insertion to database" + taskstatus[status] + "at:" + DateTime.Now.ToString("hh:mm:ss tt") ;
+                    mailmessage.Subject = "Import  "+ status;
+                    switch(status)
+                    {
+                        case MailSubject.Successful: mailmessage.Body = "";
+                            break;
+                        
+                    }
+                    mailmessage.Body = "Data insertion to database" + status + "at:" + DateTime.Now.ToString("hh:mm:ss tt") ;
                     mailmessage.IsBodyHtml = false;
 
                     using (var smtpClient = new SmtpClient())

@@ -12,14 +12,12 @@ namespace Update_DB_Daily.ServiceLayer
         private readonly IMailService _mailService;
         private readonly ILogger<ReadFileData> _logger;
         private readonly IProjectRepository _projectRepository;
-        public int _status ;
-        public enum Status{Successful,Failed};
+        private MailSubject _mailSubject;
         public ReadFileData(ILogger<ReadFileData> logger, IMailService mailService, IProjectRepository projectRepository)
         {
             _projectRepository = projectRepository;
             _mailService = mailService;
             _logger = logger;
-            _status = -1;
         }
 
         public void ReadFile( string filePath)
@@ -29,9 +27,14 @@ namespace Update_DB_Daily.ServiceLayer
                 _logger.LogInformation("Data reading started");
                 var projectList = new List<Project>();
                 var csvFileData = File.ReadAllText(filePath);
+                var errors = new List<Project>();
+                var rowNumber = 0;
                 //use try catch in foreach also if exception occur in one row whole data should not be rejected but only that row, and it should be logged also sent in me stating error at this line of file
+
+                //try using datatable with csv reader
                 foreach (var row in csvFileData.Split('\n'))
                 {
+                    rowNumber++;
                     try
                     {
                         if (!string.IsNullOrEmpty(row))
@@ -45,32 +48,34 @@ namespace Update_DB_Daily.ServiceLayer
                         }
                     }
                     catch (Exception ex){
+                        errors.Add("Error at row number "+rowNumber+" "+ex.Message);
+                        _mailSubject = MailSubject.Error;
                         _logger.LogInformation("Exception occured"+ex.Message);
                     }
                 }
+                //Use meaningful log information, and club them if coming one after other without doing any processing
                 _logger.LogInformation("Data read successfully");
                 _projectRepository.InsertProject(projectList);
 
 
                 // use enum for mailSubjects and import status. Manage import using it's status. whether error, failed or successful
                 _logger.LogInformation("Setting Success mail status to 0");
-                _status = 0;
                 //_mailService.SendMail(0);
                 _logger.LogInformation("Success mail sent");
+                _mailSubject = MailSubject.Successful;
             }
-
             catch (Exception ex)
             {
                 _logger.LogInformation("Data insertion failed"+ex.Message);
                 _logger.LogInformation("Setting Failure mail status to 1");
-                _status = 1;
-                //_mailService.SendMail(1);
+                _mailSubject = MailSubject.Failed;
+               // _mailService.SendMail(MailSubject.Failed);
                 throw;
             }
             finally
             {
                 _logger.LogInformation("Mail sending started");
-                _mailService.SendMail(_status);
+                _mailService.SendMail(_mailSubject, errors);
             }
         }
     }
