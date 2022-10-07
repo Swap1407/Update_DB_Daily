@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using MimeKit.Text;
+using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Reflection;
@@ -28,21 +29,28 @@ namespace Update_DB_Daily.ServiceLayer
         //It is a good practice to assign numbers to enum values
        // public enum Status{Successful,Failed};
 
-        public void SendMail(int status, List<Project> errors)
+        public void SendMail(int status, List<string> errors)
         {
             try
             {
                 _logger.LogInformation("Mail sending started From: "+ _mailModel.From+" To: "+ _mailModel.To);
                 using (var mailmessage = new MailMessage(_mailModel.From, _mailModel.To))
                 {
-                    mailmessage.Subject = "Import  "+ status;
+                    mailmessage.Subject = "Import  "+ Enum.GetName(typeof(MailSubject), status);
                     switch(status)
                     {
-                        case MailSubject.Successful: mailmessage.Body = "";
+                        case (int)MailSubject.Successful: 
+                            mailmessage.Body = "File Import completed at: " + DateTime.Now.ToString("hh:mm:ss tt");
                             break;
-                        
+                        case (int)MailSubject.Failed:
+                            mailmessage.Body = "File Import failed at: " + DateTime.Now.ToString("hh:mm:ss tt");
+                            break;
+                        case (int)MailSubject.Error:
+                            mailmessage.Body = "File Import completed with error at: " + DateTime.Now.ToString("hh:mm:ss tt") + "\nErrors:"+errors;
+                            break;
+
                     }
-                    mailmessage.Body = "Data insertion to database" + status + "at:" + DateTime.Now.ToString("hh:mm:ss tt") ;
+                    
                     mailmessage.IsBodyHtml = false;
 
                     using (var smtpClient = new SmtpClient())

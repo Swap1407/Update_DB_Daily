@@ -1,4 +1,7 @@
-﻿using System.Data;
+﻿using CsvHelper;
+using System;
+using System.Data;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using Update_DB_Daily.Controllers;
 using Update_DB_Daily.Data;
@@ -22,13 +25,14 @@ namespace Update_DB_Daily.ServiceLayer
 
         public void ReadFile( string filePath)
         {
+            var errors = new List<string>();
+            var projectList = new List<Project>();
             try
             {
                 _logger.LogInformation("Data reading started");
-                var projectList = new List<Project>();
                 var csvFileData = File.ReadAllText(filePath);
-                var errors = new List<Project>();
                 var rowNumber = 0;
+                
                 //use try catch in foreach also if exception occur in one row whole data should not be rejected but only that row, and it should be logged also sent in me stating error at this line of file
 
                 //try using datatable with csv reader
@@ -48,20 +52,20 @@ namespace Update_DB_Daily.ServiceLayer
                         }
                     }
                     catch (Exception ex){
-                        errors.Add("Error at row number "+rowNumber+" "+ex.Message);
+                        errors.Add("Error at row number " + rowNumber + " " + ex.Message);
                         _mailSubject = MailSubject.Error;
                         _logger.LogInformation("Exception occured"+ex.Message);
                     }
                 }
+                
                 //Use meaningful log information, and club them if coming one after other without doing any processing
-                _logger.LogInformation("Data read successfully");
-                _projectRepository.InsertProject(projectList);
+                _logger.LogInformation("Data Read");
+                _projectRepository.AddProject(projectList);
 
 
                 // use enum for mailSubjects and import status. Manage import using it's status. whether error, failed or successful
                 _logger.LogInformation("Setting Success mail status to 0");
-                //_mailService.SendMail(0);
-                _logger.LogInformation("Success mail sent");
+                
                 _mailSubject = MailSubject.Successful;
             }
             catch (Exception ex)
@@ -69,13 +73,12 @@ namespace Update_DB_Daily.ServiceLayer
                 _logger.LogInformation("Data insertion failed"+ex.Message);
                 _logger.LogInformation("Setting Failure mail status to 1");
                 _mailSubject = MailSubject.Failed;
-               // _mailService.SendMail(MailSubject.Failed);
                 throw;
             }
             finally
             {
                 _logger.LogInformation("Mail sending started");
-                _mailService.SendMail(_mailSubject, errors);
+                _mailService.SendMail((int)_mailSubject, errors);
             }
         }
     }

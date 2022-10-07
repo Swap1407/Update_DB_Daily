@@ -4,6 +4,6 @@ namespace Update_DB_Daily.ServiceLayer
 {
     public interface IMailService
     {
-        public void SendMail(int status, List<Project> errors);
+        public void SendMail(int status, List<string> errors);
     }
 }

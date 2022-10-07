@@ -13,7 +13,7 @@ namespace Update_DB_Daily.ServiceLayer
             _logger = logger;
         }
 
-        public void InsertProject(List<Project> projectList)
+        public void AddProject(List<Project> projectList)
         {
             _logger.LogInformation("Data insertion to DB started");
             _projectDBContext.Projects.AddRange(projectList);

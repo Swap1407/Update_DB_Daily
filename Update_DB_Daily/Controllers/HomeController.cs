@@ -37,8 +37,8 @@ namespace Update_DB_Daily.Controllers
                 int hh = int.Parse(_hours);
                 int mm = int.Parse(_minutes);
                 //you should also define timing for job's execution, read it from appSettings.json
-                //RecurringJob.AddOrUpdate(() => _readFileData.ReadFile(_filePath), Cron.Minutely);
-                RecurringJob.AddOrUpdate(() => _readFileData.ReadFile(_filePath), Cron.Daily(hh,mm));
+                RecurringJob.AddOrUpdate(() => _readFileData.ReadFile(_filePath), Cron.Minutely);
+                //RecurringJob.AddOrUpdate(() => _readFileData.ReadFile(_filePath), Cron.Daily(hh,mm));
                 _logger.LogInformation("File data insertion task done and Mail sent");
             }
             catch (Exception ex)
