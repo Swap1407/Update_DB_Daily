@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Update_DB_Daily.ServiceLayer;
 using Update_DB_Daily.Models;
+using static Update_DB_Daily.ServiceLayer.MailService;
+using System.Net.Mail;
 
 namespace Update_DB_Daily_Test
 {
@@ -39,23 +41,43 @@ namespace Update_DB_Daily_Test
         [Test]
         public void GivenSubjectAndBodyOfMailHavingNullFromAddress_ThenfunctionshouldReturnValueCannotBeNullException()
         {
-            _mockmailModel = new MailModel() {FROM = null, TO = _mailTO, HostName = _hostName, Password = _password };
+            _mockmailModel = new MailModel() { To = _mailTO, HostName = _hostName, Password = _password };
             _mailService = new MailService(_mockLogger.Object, (Microsoft.Extensions.Configuration.IConfiguration)_mockConfiguration.Object, _mockmailModel);
-            var subject = "Data inserted successfully";
-            var body = "Data inserted to database successfully at: " + DateTime.Now.ToString("hh:mm:ss tt");
-            var exception = Assert.Throws<ArgumentNullException>(() => _mailService.SendMail( subject, body));
+            var status = 0;
+            var exception = Assert.Throws<ArgumentNullException>(() => _mailService.SendMail( status));
             Assert.That(exception.Message, Is.EqualTo("Value cannot be null. (Parameter 'from')"));
         }
         [Test]
         public void GivenSubjectAndBodyOfMailHavingNullToAddress_ThenfunctionshouldReturnValueCannotBeNullException()
         {
-            _mockmailModel = new MailModel() { FROM = _mailFrom, HostName = _hostName, Password = _password };
+            _mockmailModel = new MailModel() { From = _mailFrom, HostName = _hostName, Password = _password };
             _mailService = new MailService(_mockLogger.Object, (Microsoft.Extensions.Configuration.IConfiguration)_mockConfiguration.Object, _mockmailModel);
-            var subject = "Data inserted successfully";
-            var body = "Data inserted to database successfully at: " + DateTime.Now.ToString("hh:mm:ss tt");
-
-            var exception = Assert.Throws<ArgumentNullException>(() => _mailService.SendMail(subject, body));
+            var status = 0;
+            var exception = Assert.Throws<ArgumentNullException>(() => _mailService.SendMail(status));
             Assert.That(exception.Message, Is.EqualTo("Value cannot be null. (Parameter 'to')"));
         }
+        [Test]
+        public void GivenSubjectAndBodyOfMailHavingWrongStatus_ThenfunctionshouldReturnIndexOutOfRangeException()
+        {
+            _mockmailModel = new MailModel() { From = _mailFrom, To = _mailTO, HostName = _hostName, Password = _password };
+            _mailService = new MailService(_mockLogger.Object, (Microsoft.Extensions.Configuration.IConfiguration)_mockConfiguration.Object, _mockmailModel);
+            var status = 2;
+            var exception = Assert.Throws<IndexOutOfRangeException>(() => _mailService.SendMail(status));
+            Assert.That(exception.Message, Is.EqualTo("Index was outside the bounds of the array."));
+        }
+        
+        /*
+        [Test]
+        public void GivenStatusOfMail_ThenfunctionshouldHaveSuccessSubject()
+        {
+            _mockmailModel = new MailModel() { From = _mailFrom, To = _mailTO, HostName = _hostName, Password = _password };
+            _mailService = new MailService(_mockLogger.Object, (Microsoft.Extensions.Configuration.IConfiguration)_mockConfiguration.Object, _mockmailModel);
+            var status = 0;
+            _mailService.SendMail(status);
+            string[] taskstatus = Status.GetNames(typeof(Status));
+            var Subject = "Data Insertion: " + taskstatus[status];
+            Assert.That(Subject, Is.EqualTo("Data Insertion: Successful"));
+        }
+        */
     }
 }

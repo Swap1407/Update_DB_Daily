@@ -7,9 +7,10 @@ namespace Update_DB_Daily.ServiceLayer
     // ProjectFlatFileRepository
 
     //And from your code whereever you require to call any method call ProjectDBRepository
-    public interface IInsertFileDataToDB
+    public interface IProjectRepository
     {
         //use proper naming, it should be only InsertProjects
-        public void InsertDataToDB(List<Project> projectList);
+        public void InsertProject(List<Project> projectList);
+
     }
 }

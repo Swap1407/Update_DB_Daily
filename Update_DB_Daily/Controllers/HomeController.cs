@@ -15,6 +15,8 @@ namespace Update_DB_Daily.Controllers
         private readonly IReadFileData _readFileData;
         private readonly string _filePath;
         private readonly IConfiguration _configuration;
+        private readonly string _hours;
+        private readonly string _minutes;
 
         public HomeController(ILogger<HomeController> logger, IReadFileData readFileData,IConfiguration configuration)
         {
@@ -22,15 +24,21 @@ namespace Update_DB_Daily.Controllers
             _readFileData = readFileData;
             _configuration = configuration;
             _filePath = _configuration.GetConnectionString("FilePath");
+            var section = _configuration.GetSection("ScheduleJobTime");
+            _hours = section["Hour"];
+            _minutes = section["Minutes"];
         }
 
         public IActionResult Index()
         {
             try
             {
-                _logger.LogInformation("Recurring job started");
+                _logger.LogInformation("Recurring job restart at"+_hours + "  " + _minutes);
+                int hh = int.Parse(_hours);
+                int mm = int.Parse(_minutes);
                 //you should also define timing for job's execution, read it from appSettings.json
-                RecurringJob.AddOrUpdate(() => _readFileData.ReadFile(_filePath), Cron.Daily);
+                //RecurringJob.AddOrUpdate(() => _readFileData.ReadFile(_filePath), Cron.Minutely);
+                RecurringJob.AddOrUpdate(() => _readFileData.ReadFile(_filePath), Cron.Daily(hh,mm));
                 _logger.LogInformation("File data insertion task done and Mail sent");
             }
             catch (Exception ex)

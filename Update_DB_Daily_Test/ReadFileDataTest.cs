@@ -16,7 +16,7 @@ namespace Update_DB_Daily_Test
         private ReadFileData _readFileData;
         private Mock<ILogger<ReadFileData>> _mockLogger;
         private Mock<IMailService> _mockmailService;
-        private Mock<IInsertFileDataToDB> _mockinsertFileDataToDB;
+        private Mock<IProjectRepository> _mockprojectRepository;
 
 
         [SetUp]
@@ -24,7 +24,7 @@ namespace Update_DB_Daily_Test
         {
             _mockLogger = new Mock<ILogger<ReadFileData>>();
             _mockmailService = new Mock<IMailService>();
-            _mockinsertFileDataToDB = new Mock<IInsertFileDataToDB>();
+            _mockprojectRepository = new Mock<IProjectRepository>();
         }
 
         // You should write some more unit tests like insertDB is called when everything is okay. Exception raised. Mail sent properly
@@ -32,13 +32,29 @@ namespace Update_DB_Daily_Test
         [Test]
         public void GivenfilePathwithNullValue_ThenfunctionshouldReturnValueCannotBeNullException()
         {
-            _readFileData = new ReadFileData(_mockLogger.Object,  _mockmailService.Object, _mockinsertFileDataToDB.Object);
+            _readFileData = new ReadFileData(_mockLogger.Object,  _mockmailService.Object, _mockprojectRepository.Object);
             //string is a reference type it is implicitly nullable
-            string? filePath = null;
             // this exception is not handled by you in code. You should handle all the excpetions
             // we write unit test for only handled exception
-            var exception = Assert.Throws<ArgumentNullException>(() => _readFileData.ReadFile(filePath));
+            var exception = Assert.Throws<ArgumentNullException>(() => _readFileData.ReadFile(null));
             Assert.That(exception.Message, Is.EqualTo("Value cannot be null. (Parameter 'path')"));
+        }
+        [Test]
+        public void GivenAllCorrectValues_ThenfunctionshouldHaveStatusValue0WhichisSuccessMail()
+        {
+            _readFileData = new ReadFileData(_mockLogger.Object, _mockmailService.Object, _mockprojectRepository.Object);
+            string filePath = @"C:\Users\swapnil.siddheshwar\Documents\C# Tasks\projectsdata.csv";
+            _readFileData.ReadFile(filePath);
+            Assert.That(_readFileData._status, Is.EqualTo(0));
+        }
+        [Test]
+        public void GivenAllCorrectValues_ThenfunctionshouldHaveStatusValue1WhichisFailureMail()
+        {
+            _readFileData = new ReadFileData(_mockLogger.Object, _mockmailService.Object, _mockprojectRepository.Object);
+            //string filePath = @"C:\Users\swapnil.siddheshwar\Documents\C# Tasks\projectsdata.csv";
+            
+            _readFileData.ReadFile(null);
+            Assert.That(_readFileData._status, Is.EqualTo(1));
         }
     }
 }

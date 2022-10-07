@@ -26,7 +26,7 @@ builder.Services.AddDbContext<ProjectDBContext>(options => options.UseSqlServer(
 builder.Services.Configure<MailModel>(builder.Configuration.GetSection("MailModel"));
 
 builder.Services.AddScoped<IReadFileData, ReadFileData>();
-builder.Services.AddScoped<IInsertFileDataToDB , InsertFileDataToDB>();
+builder.Services.AddScoped<IProjectRepository, ProjectDBRepository>();
 builder.Services.AddTransient<IMailService, MailService>();
 
 var configuration = new ConfigurationBuilder().SetBasePath(AppDomain.CurrentDomain.BaseDirectory).AddJsonFile("appsettings.json").Build();

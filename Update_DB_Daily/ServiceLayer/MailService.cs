@@ -1,10 +1,12 @@
-﻿using MailKit.Security;
+﻿
+using MailKit.Security;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using MimeKit.Text;
 using System.Net;
 using System.Net.Mail;
+using System.Reflection;
 using Update_DB_Daily.Models;
 
 namespace Update_DB_Daily.ServiceLayer
@@ -21,16 +23,18 @@ namespace Update_DB_Daily.ServiceLayer
             _configuration = configuration;
             _mailModel = mailModel;
         }
+        public enum Status{Successful,Failed};
 
-        public void SendMail(string mailsubject, string mailbody)
+        public void SendMail(int status)
         {
             try
             {
-                _logger.LogInformation("Mail sending started From: "+ _mailModel.FROM+" To: "+ _mailModel.TO);
-                using (var mailmessage = new MailMessage(_mailModel.FROM, _mailModel.TO))
+                _logger.LogInformation("Mail sending started From: "+ _mailModel.From+" To: "+ _mailModel.To);
+                using (var mailmessage = new MailMessage(_mailModel.From, _mailModel.To))
                 {
-                    mailmessage.Subject = mailsubject;
-                    mailmessage.Body = mailbody;
+                    string[] taskstatus = Status.GetNames(typeof(Status));
+                    mailmessage.Subject = "Data Insertion: "+taskstatus[status];
+                    mailmessage.Body = "Data insertion to database" + taskstatus[status] + "at:" + DateTime.Now.ToString("hh:mm:ss tt") ;
                     mailmessage.IsBodyHtml = false;
 
                     using (var smtpClient = new SmtpClient())
@@ -38,7 +42,7 @@ namespace Update_DB_Daily.ServiceLayer
                         smtpClient.Host = _mailModel.HostName;
                         smtpClient.Port = 587;
                         smtpClient.UseDefaultCredentials = false;
-                        var NetworkCred = new NetworkCredential(_mailModel.FROM, _mailModel.Password);
+                        var NetworkCred = new NetworkCredential(_mailModel.From, _mailModel.Password);
                         smtpClient.Credentials = NetworkCred;
                         smtpClient.EnableSsl = true;
                         smtpClient.Send(mailmessage);

@@ -11,13 +11,15 @@ namespace Update_DB_Daily.ServiceLayer
     {
         private readonly IMailService _mailService;
         private readonly ILogger<ReadFileData> _logger;
-        private readonly IInsertFileDataToDB _insertFileDataToDB;
-
-        public ReadFileData(ILogger<ReadFileData> logger, IMailService mailService, IInsertFileDataToDB insertFileDataToDB)
+        private readonly IProjectRepository _projectRepository;
+        public int _status ;
+        public enum Status{Successful,Failed};
+        public ReadFileData(ILogger<ReadFileData> logger, IMailService mailService, IProjectRepository projectRepository)
         {
-            _insertFileDataToDB = insertFileDataToDB;
+            _projectRepository = projectRepository;
             _mailService = mailService;
             _logger = logger;
+            _status = -1;
         }
 
         public void ReadFile( string filePath)
@@ -30,36 +32,45 @@ namespace Update_DB_Daily.ServiceLayer
                 //use try catch in foreach also if exception occur in one row whole data should not be rejected but only that row, and it should be logged also sent in me stating error at this line of file
                 foreach (var row in csvFileData.Split('\n'))
                 {
-                    if (!string.IsNullOrEmpty(row))
+                    try
                     {
-                        var project = new Project()
+                        if (!string.IsNullOrEmpty(row))
                         {
-                            ProjectName = row.Split(",")[0],
-                            ProjectDetails = row.Split(",")[1]
-                        };
-                        projectList.Add(project);
+                            var project = new Project()
+                            {
+                                ProjectName = row.Split(",")[0],
+                                ProjectDetails = row.Split(",")[1]
+                            };
+                            projectList.Add(project);
+                        }
+                    }
+                    catch (Exception ex){
+                        _logger.LogInformation("Exception occured"+ex.Message);
                     }
                 }
                 _logger.LogInformation("Data read successfully");
-                _insertFileDataToDB.InsertDataToDB(projectList);
+                _projectRepository.InsertProject(projectList);
 
-                _logger.LogInformation("Success mail sending started");
 
                 // use enum for mailSubjects and import status. Manage import using it's status. whether error, failed or successful
-                var mailsubject = "Data insertion Successful";
-                var mailbody = "Data inserted to database successfully at: "+ DateTime.Now.ToString("hh:mm:ss tt");
-                _mailService.SendMail(mailsubject,mailbody);
+                _logger.LogInformation("Setting Success mail status to 0");
+                _status = 0;
+                //_mailService.SendMail(0);
                 _logger.LogInformation("Success mail sent");
             }
 
             catch (Exception ex)
             {
-                _logger.LogInformation("Failure mail sending started");
-                var mailsubject = "Data insertion Failed";
-                var mailbody = "Data not inserted to database at: " + DateTime.Now.ToString("hh:mm:ss tt") + ex.Message;
-                _mailService.SendMail(mailsubject, mailbody);
-                _logger.LogInformation("Failure mail sent");
+                _logger.LogInformation("Data insertion failed"+ex.Message);
+                _logger.LogInformation("Setting Failure mail status to 1");
+                _status = 1;
+                //_mailService.SendMail(1);
                 throw;
+            }
+            finally
+            {
+                _logger.LogInformation("Mail sending started");
+                _mailService.SendMail(_status);
             }
         }
     }
