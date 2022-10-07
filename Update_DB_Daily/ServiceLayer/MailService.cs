@@ -37,33 +37,10 @@ namespace Update_DB_Daily.ServiceLayer
                 using (var mailmessage = new MailMessage(_mailModel.From, _mailModel.To))
                 {
                     mailmessage.Subject = "Import  "+ Enum.GetName(typeof(MailSubject), status);
-                    switch(status)
-                    {
-                        case (int)MailSubject.Successful: 
-                            mailmessage.Body = "File Import completed at: " + DateTime.Now.ToString("hh:mm:ss tt");
-                            break;
-                        case (int)MailSubject.Failed:
-                            mailmessage.Body = "File Import failed at: " + DateTime.Now.ToString("hh:mm:ss tt");
-                            break;
-                        case (int)MailSubject.Error:
-                            mailmessage.Body = "File Import completed with error at: " + DateTime.Now.ToString("hh:mm:ss tt") + "\nErrors:"+errors;
-                            break;
-
-                    }
-                    
+                    SetMailBody(mailmessage);
                     mailmessage.IsBodyHtml = false;
-
-                    using (var smtpClient = new SmtpClient())
-                    {
-                        smtpClient.Host = _mailModel.HostName;
-                        smtpClient.Port = 587;
-                        smtpClient.UseDefaultCredentials = false;
-                        var NetworkCred = new NetworkCredential(_mailModel.From, _mailModel.Password);
-                        smtpClient.Credentials = NetworkCred;
-                        smtpClient.EnableSsl = true;
-                        smtpClient.Send(mailmessage);
-                        _logger.LogInformation("Mail sent successfully...");
-                    }
+                    SendMail(mailmessage);
+                    
                 }
             }
             catch (Exception)
@@ -72,6 +49,38 @@ namespace Update_DB_Daily.ServiceLayer
                 throw ;
             }
             
+        }
+
+        private void SetMailBody(MailMessage mailMessage)
+        {
+            switch (status)
+            {
+                case (int)MailSubject.Successful:
+                    mailmessage.Body = "File Import completed at: " + DateTime.Now.ToString("hh:mm:ss tt");
+                    break;
+                case (int)MailSubject.Failed:
+                    mailmessage.Body = "File Import failed at: " + DateTime.Now.ToString("hh:mm:ss tt");
+                    break;
+                case (int)MailSubject.Error:
+                    mailmessage.Body = "File Import completed with error at: " + DateTime.Now.ToString("hh:mm:ss tt") + "\nErrors:" + errors;
+                    break;
+
+            }
+        }
+
+        private void SendMail(MailMessage mailMessage)
+        {
+            using (var smtpClient = new SmtpClient())
+            {
+                smtpClient.Host = _mailModel.HostName;
+                smtpClient.Port = 587;
+                smtpClient.UseDefaultCredentials = false;
+                var NetworkCred = new NetworkCredential(_mailModel.From, _mailModel.Password);
+                smtpClient.Credentials = NetworkCred;
+                smtpClient.EnableSsl = true;
+                smtpClient.Send(mailmessage);
+                _logger.LogInformation("Mail sent successfully...");
+            }
         }
     }
 }

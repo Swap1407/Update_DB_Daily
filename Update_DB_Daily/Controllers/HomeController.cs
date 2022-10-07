@@ -29,7 +29,8 @@ namespace Update_DB_Daily.Controllers
             _minutes = section["Minutes"];
         }
 
-        public IActionResult Index()
+        //background job should not automatically return or redirect to view
+        public void Index()
         {
             try
             {
@@ -44,9 +45,7 @@ namespace Update_DB_Daily.Controllers
             catch (Exception ex)
             {
                 _logger.LogInformation("File data insertion failed"+ex.Message);
-                return View("Error");
             }
-            return View();
         }
 
     }
