@@ -70,6 +70,7 @@ namespace Update_DB_Daily.ServiceLayer
 
         private void SendMail(MailMessage mailMessage)
         {
+            //master branch commit
             using (var smtpClient = new SmtpClient())
             {
                 smtpClient.Host = _mailModel.HostName;
