@@ -8,7 +8,7 @@ using Update_DB_Daily.Data;
 using Update_DB_Daily.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-
+//master branch commit
 //hangfire
 var HangFireTaskConnectionString = builder.Configuration.GetConnectionString("HangFireConnectionString");
 builder.Services.AddHangfire(configuration => configuration
